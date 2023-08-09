@@ -1,0 +1,4 @@
+varReference:
+- path: spec/template/spec/securityContext/fsGroup
+  kind: Job
+  

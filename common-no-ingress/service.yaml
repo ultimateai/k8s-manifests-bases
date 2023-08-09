@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/health: "/ready"
+  name: service
+spec:
+  ports:
+    - name: http
+      port: 3000

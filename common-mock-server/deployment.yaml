@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+spec:
+  replicas: 2
+  progressDeadlineSeconds: 120
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        prometheus.io/scrape: "false"
+    spec:
+      securityContext:
+        fsGroup: $(FS_GROUP)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 100
+      restartPolicy: Always
+      serviceAccountName: service-account
+      containers:
+      - name: app
+        image: app:latest
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: $(APP_PORT)
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          failureThreshold: 2
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: $(APP_PORT)
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          failureThreshold: 3
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: $(APP_PORT)
+        resources:
+          requests:
+            cpu: "1"
+            memory: 512M
+        envFrom:
+        - configMapRef:
+            name: conf
+        - secretRef:
+            name: secrets            

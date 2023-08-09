@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob
+spec:
+  schedule: "0 0 29 2 1"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            fsGroup: $(FS_GROUP)
+          restartPolicy: Never
+          serviceAccountName: service-account
+          containers:
+            - name: app
+              image: app:latest
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the Kubernetes cluster
+              imagePullPolicy: Always
+              resources:
+                limits:
+                  memory: 512M
+                requests:
+                  cpu: "0.25"
+                  memory: 256M
+              envFrom:
+                - configMapRef:
+                    name: conf
+                - secretRef:
+                    name: secrets

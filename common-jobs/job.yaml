@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job
+spec:
+  template:
+    metadata:
+    spec:
+      securityContext:
+        fsGroup: $(FS_GROUP)
+      restartPolicy: Never
+      serviceAccountName: service-account
+      containers:
+        - name: app
+          image: app:latest
+          args:
+            - /bin/sh
+            - -c
+            - echo "hi"
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 512M
+            requests:
+              cpu: "0.25"
+              memory: 256M
+          envFrom:
+            - configMapRef:
+                name: conf
+            - secretRef:
+                name: secrets
