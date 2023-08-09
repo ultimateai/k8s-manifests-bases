@@ -1,0 +1,11 @@
+varReference:
+- path: spec/template/spec/containers/ports/containerPort
+  kind: Deployment
+- path: spec/template/spec/containers/readinessProbe/httpGet/port
+  kind: Deployment
+- path: spec/rules/http/paths/backend/service/name
+  kind: Ingress
+- path: spec/rules/http/paths/backend/service/port/number
+  kind: Ingress
+- path: spec/template/spec/securityContext/fsGroup
+  kind: Deployment
