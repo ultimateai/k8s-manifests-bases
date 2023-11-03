@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: statefulset
+spec:
+  serviceName: service
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        prometheus.io/scrape: "false"
+    spec:
+      securityContext:
+        fsGroup: $(FS_GROUP)
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 100
+      restartPolicy: Always
+      serviceAccountName: service-account
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "2"
+      containers:
+      - name: app
+        image: app:latest
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: $(APP_PORT)
+          initialDelaySeconds: 5
+          periodSeconds: 3
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: $(APP_PORT)
+        resources:
+          requests:
+            cpu: "1"
+            memory: 512M
+        envFrom:
+        - configMapRef:
+            name: conf
+        - secretRef:
+            name: secrets
