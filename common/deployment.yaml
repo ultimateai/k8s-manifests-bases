@@ -43,6 +43,11 @@ spec:
           requests:
             cpu: "1"
             memory: 512M
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         envFrom:
         - configMapRef:
             name: conf
